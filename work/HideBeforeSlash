@@ -1,0 +1,23 @@
+Sub HideBeforeSlash()
+    Dim para As Paragraph
+    Dim rng As Range
+    Dim strText As String
+    Dim slashPos As Integer
+    
+    For Each para In ActiveDocument.Paragraphs
+        Set rng = para.Range
+        rng.MoveEnd Unit:=wdCharacter, Count:=-1 ' Exclude the paragraph mark
+        strText = rng.Text
+        slashPos = InStr(strText, "/ ")
+        
+        If slashPos > 0 Then
+            ' Define the range for the text before the "/ "
+            Set rng = para.Range.Duplicate
+            rng.MoveEnd Unit:=wdCharacter, Count:=-1 ' Exclude the paragraph mark
+            rng.End = rng.Start + slashPos ' Move the end to just before the "/ "
+            
+            ' Hide the range
+            rng.Font.Hidden = True
+        End If
+    Next para
+End Sub

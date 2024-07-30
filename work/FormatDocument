@@ -1,0 +1,56 @@
+Sub FormatDocument()
+    Dim sec As Section
+
+    ' Set margins
+    With ActiveDocument.PageSetup
+        .TopMargin = InchesToPoints(1)
+        .BottomMargin = InchesToPoints(1)
+        .LeftMargin = InchesToPoints(1)
+        .RightMargin = InchesToPoints(1)
+    End With
+
+    ' Loop through each section and set formatting
+    For Each sec In ActiveDocument.Sections
+        With sec.PageSetup
+            ' Set orientation
+            .Orientation = wdOrientPortrait
+            
+            ' Set paper size
+            .PaperSize = wdPaperA4
+
+            ' Set header and footer distance
+            .HeaderDistance = InchesToPoints(0.5)
+            .FooterDistance = InchesToPoints(0.5)
+            
+            ' Set section start type
+            .SectionStart = wdSectionNewPage
+        End With
+
+        ' Add headers and footers
+        ' With sec.Headers(wdHeaderFooterPrimary)
+        '     .Range.Text = "Header Text"
+        '     .Range.ParagraphFormat.Alignment = wdAlignParagraphCenter
+        ' End With
+        
+        ' With sec.Footers(wdHeaderFooterPrimary)
+        '     .Range.Text = "Footer Text"
+        '     .Range.ParagraphFormat.Alignment = wdAlignParagraphCenter
+        ' End With
+    Next sec
+    
+    ' Set default font
+    With ActiveDocument.Styles(wdStyleNormal).Font
+        .Name = "Arial"
+        .Size = 12
+    End With
+
+    ' Add a title to the document
+    With ActiveDocument.Paragraphs(1).Range
+        ' .InsertBefore "Document Title"
+        .Font.Name = "Arial"
+        .Font.Size = 16
+        .Font.Bold = True
+        .ParagraphFormat.Alignment = wdAlignParagraphCenter
+        .ParagraphFormat.SpaceAfter = 24
+    End With
+End Sub

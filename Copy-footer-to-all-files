@@ -1,0 +1,41 @@
+Sub CopyFooterToAllDocsInFolder()
+    Dim folderPath As String
+    Dim fileName As String
+    Dim doc As Document
+    Dim sourceDoc As Document
+    Dim footerText As String
+    Dim footerIndex As Integer
+    
+    ' Get the folder path from the user
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "Select Folder Containing Word Files"
+        If .Show <> -1 Then Exit Sub
+        folderPath = .SelectedItems(1) & "\"
+    End With
+    
+    ' Store the active document (source document)
+    Set sourceDoc = ActiveDocument
+    
+    ' Loop through all the Word documents in the folder
+    fileName = Dir(folderPath & "*.docx")
+    Do While fileName <> ""
+        ' Open each document
+        Set doc = Documents.Open(folderPath & fileName)
+        
+        ' Copy footers from the source document to the target document
+        For footerIndex = 1 To 3 ' There are three types of footers (wdHeaderFooterPrimary, wdHeaderFooterFirstPage, wdHeaderFooterEvenPages)
+            footerText = sourceDoc.Sections(1).Footers(footerIndex).Range.Text
+            doc.Sections(1).Footers(footerIndex).Range.Text = footerText
+        Next footerIndex
+        
+        ' Save and close the target document
+        doc.Save
+        doc.Close
+        
+        ' Get the next file
+        fileName = Dir
+    Loop
+    
+    ' Notify the user that the process is complete
+    MsgBox "Footer copied to all documents in the folder.", vbInformation
+End Sub

@@ -1,0 +1,24 @@
+Sub ExtractTextBoxContents()
+    Dim shp As Shape
+    Dim shpRange As Range
+    Dim newRange As Range
+    Dim doc As Document
+    
+    Set doc = ActiveDocument
+
+    ' Loop through all shapes in the document
+    For Each shp In doc.Shapes
+        ' Check if the shape is a text box
+        If shp.Type = msoTextBox Then
+            ' Get the range of the text box
+            Set shpRange = shp.TextFrame.TextRange
+            ' Copy the content of the text box
+            shpRange.Copy
+            ' Insert the copied content at the end of the document or another appropriate location
+            Set newRange = doc.Range(doc.Content.End - 1, doc.Content.End - 1)
+            newRange.Paste
+            ' Delete the original text box
+            shp.Delete
+        End If
+    Next shp
+End Sub

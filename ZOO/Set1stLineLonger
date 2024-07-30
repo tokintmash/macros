@@ -1,0 +1,58 @@
+Sub AdjustSubtitles()
+    Dim para As Paragraph
+    Dim i As Long, startPos As Long, endPos As Long
+    Dim content As String
+    Dim lines() As String
+    Dim delimiter As String
+
+    delimiter = vbCrLf
+
+    ' Get the document content as a single string
+    content = ActiveDocument.Content.Text
+
+    ' Split the document content into paragraphs using " ===> " as the delimiter
+    lines = Split(content, " ===> ")
+
+    ' Process each paragraph
+    For i = LBound(lines) To UBound(lines) - 1
+        ' Locate the start and end positions of the current paragraph
+        startPos = InStr(content, lines(i) & " ===>")
+        endPos = InStr(startPos + Len(lines(i)), content, " ===>") - 1
+        If endPos = -1 Then
+            endPos = Len(content)
+        End If
+        
+        ' Extract the paragraph content
+        Dim paraContent As String
+        paraContent = Mid(content, startPos, endPos - startPos)
+        
+        ' Split the paragraph into individual lines
+        Dim paraLines() As String
+        paraLines = Split(paraContent, delimiter)
+        
+        ' Ensure there are at least three lines to process
+        If UBound(paraLines) >= 2 Then
+            ' Compare the length of the two lines after the time range
+            If Len(paraLines(1)) < Len(paraLines(2)) Then
+                ' Adjust lines until the first one is longer
+                Do While Len(paraLines(1)) < Len(paraLines(2))
+                    ' Move the first word from the second line to the first line
+                    Dim words() As String
+                    words = Split(paraLines(2), " ")
+                    If UBound(words) > 0 Then
+                        paraLines(1) = paraLines(1) & " " & words(0)
+                        paraLines(2) = Right(paraLines(2), Len(paraLines(2)) - Len(words(0)) - 1)
+                    Else
+                        ' If no more words to move, exit the loop
+                        Exit Do
+                    End If
+                Loop
+                ' Reconstruct the paragraph content
+                paraContent = Join(paraLines, delimiter)
+                
+                ' Update the document with the adjusted paragraph
+                ActiveDocument.Range(startPos, endPos).Text = paraContent
+            End If
+        End If
+    Next i
+End Sub

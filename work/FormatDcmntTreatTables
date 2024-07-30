@@ -1,0 +1,108 @@
+Sub FormatAndPutTablesToHeader()
+    Dim sec As Section
+    Dim shp As Shape
+    Dim i As Integer
+    Dim rng As Range
+    Dim enableDifferentFirstPage As VbMsgBoxResult
+    Dim tbl As Table
+    Dim cell As Cell
+    Dim tagContent As String
+    Dim tblRange As Range
+
+    ' Prompt the user to ask if they want different first page headers and footers
+    enableDifferentFirstPage = MsgBox("Different first page?", vbYesNo + vbQuestion, "Header/Footer Option")
+
+    ' Un-frame all framed objects
+    For Each shp In ActiveDocument.Shapes
+        If shp.Type = msoTextBox Then
+            shp.ConvertToInlineShape
+        End If
+    Next shp
+
+    ' Un-frame text frames
+    For i = ActiveDocument.Frames.Count To 1 Step -1
+        With ActiveDocument.Frames(i)
+            .Range.ParagraphFormat.Borders(wdBorderLeft).LineStyle = wdLineStyleNone
+            .Range.ParagraphFormat.Borders(wdBorderRight).LineStyle = wdLineStyleNone
+            .Range.ParagraphFormat.Borders(wdBorderTop).LineStyle = wdLineStyleNone
+            .Range.ParagraphFormat.Borders(wdBorderBottom).LineStyle = wdLineStyleNone
+            .Delete
+        End With
+    Next i
+
+    ' Set margins
+    With ActiveDocument.PageSetup
+        .TopMargin = CentimetersToPoints(2.54)
+        .BottomMargin = CentimetersToPoints(2.54)
+        .LeftMargin = CentimetersToPoints(1.9)
+        .RightMargin = CentimetersToPoints(1.9)
+    End With
+
+    ' Remove all section breaks
+    Set rng = ActiveDocument.Content
+    With rng.Find
+        .Text = "^b"
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Execute Replace:=wdReplaceAll
+    End With
+
+    ' Ensure there's only one section in the document
+    Set sec = ActiveDocument.Sections(1)
+
+    ' Set page setup for the single section
+    With sec.PageSetup
+        ' Set orientation
+        .Orientation = wdOrientPortrait
+        
+        ' Set paper size
+        .PaperSize = wdPaperA4
+
+        ' Set header and footer distance
+        .HeaderDistance = CentimetersToPoints(1.27)  ' 0.5 inch
+        .FooterDistance = CentimetersToPoints(1.27)  ' 0.5 inch
+        
+        ' Set Different First Page Header/Footer based on user input
+        If enableDifferentFirstPage = vbYes Then
+            .DifferentFirstPageHeaderFooter = True
+        Else
+            .DifferentFirstPageHeaderFooter = False
+        End If
+    End With
+    
+    ' Set default font
+    With ActiveDocument.Styles(wdStyleNormal).Font
+        .Name = "Arial"
+        .Size = 12
+    End With
+
+    ' Check tables for custom tags and update headers/footers
+    For Each tbl In ActiveDocument.Tables
+        For Each cell In tbl.Range.Cells
+            tagContent = cell.Range.Text
+            tagContent = Left(tagContent, Len(tagContent) - 2) ' Remove end-of-cell marker
+
+            If InStr(tagContent, "Sctn") > 0 Then
+                ' Copy the entire table content
+                Set tblRange = tbl.Range
+                tblRange.Copy
+                
+                ' Determine which header/footer to update based on the tag
+                Select Case True
+                    Case InStr(tagContent, "Sctn1Hdr") > 0
+                        ActiveDocument.Sections(1).Headers(wdHeaderFooterPrimary).Range.Paste
+                    Case InStr(tagContent, "Sctn2Hdr") > 0
+                        ActiveDocument.Sections(2).Headers(wdHeaderFooterPrimary).Range.Paste
+                    Case InStr(tagContent, "Sctn1Ftr") > 0
+                        ActiveDocument.Sections(1).Footers(wdHeaderFooterPrimary).Range.Paste
+                    Case InStr(tagContent, "Sctn2Ftr") > 0
+                        ActiveDocument.Sections(2).Footers(wdHeaderFooterPrimary).Range.Paste
+                    ' Add more cases as needed for additional sections
+                End Select
+                
+                Exit For ' Exit the cell loop as we found the tag
+            End If
+        Next cell
+    Next tbl
+End Sub

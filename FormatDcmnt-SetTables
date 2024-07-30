@@ -1,5 +1,8 @@
-' Ask for first page
+' Asks for first page
+' Deletes all section breaks
+' Sets margins to Moderate
 ' Set tables to autofit window
+' Sets all table cells to vertically aligned to top with a few exceptions (see at the end)
 
 Sub FormatModerateSetTables()
     Dim sec As section

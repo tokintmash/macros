@@ -1,0 +1,19 @@
+Sub DeleteTranslationColumns()
+    Dim tbl As Table
+    Dim colIndex As Long
+    Dim cellText As String
+    
+    ' Loop through all tables in the document
+    For Each tbl In ActiveDocument.Tables
+        ' Loop through the columns from right to left (to avoid shifting issues when deleting)
+        For colIndex = tbl.Columns.Count To 1 Step -1
+            cellText = Trim(tbl.Cell(1, colIndex).Range.Text)
+            cellText = Left(cellText, Len(cellText) - 2) ' Remove the end-of-cell marker
+            
+            ' Check if the first row of the column is "TRANSLATION"
+            If UCase(cellText) = "TRANSLATION" Then
+                tbl.Columns(colIndex).Delete
+            End If
+        Next colIndex
+    Next tbl
+End Sub

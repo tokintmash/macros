@@ -1,0 +1,21 @@
+Sub DuplicateColumnAndAddTranslation()
+    Dim tbl As Table
+    Dim i As Integer
+    
+    ' Loop through all tables in the document
+    For Each tbl In ActiveDocument.Tables
+        ' Check if the table has at least one column
+        If tbl.Columns.Count > 0 Then
+            ' Add a new column to the right of the first column
+            tbl.Columns.Add
+            
+            ' Copy the contents of the first column to the new column
+            For i = 1 To tbl.Rows.Count
+                tbl.Cell(i, 2).Range.Text = tbl.Cell(i, 1).Range.Text
+            Next i
+            
+            ' Rename the first row of the new column to "TRANSLATION"
+            tbl.Cell(1, 2).Range.Text = "TRANSLATION"
+        End If
+    Next tbl
+End Sub

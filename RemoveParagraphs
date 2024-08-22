@@ -1,0 +1,37 @@
+' Sub RemoveTrailingParagraphMarks()
+'     Dim tbl As Table
+'     Dim cell As Cell
+'     Dim cellContent As String
+    
+'     ' Loop through all tables in the document
+'     For Each tbl In ActiveDocument.Tables
+'         ' Loop through each cell in the table
+'         For Each cell In tbl.Range.Cells
+'             cellContent = cell.Range.Text
+'             ' Remove the last paragraph mark (two characters)
+'             If Right(cellContent, 2) = vbCr & Chr(7) Then
+'                 cell.Range.Text = Left(cellContent, Len(cellContent) - 2)
+'             End If
+'         Next cell
+'     Next tbl
+' End Sub
+
+Sub RemoveExtraParagraphMarks()
+    Dim tbl As Table
+    Dim cell As Cell
+    Dim cellContent As String
+    
+    ' Loop through all tables in the document
+    For Each tbl In ActiveDocument.Tables
+        ' Loop through each cell in the table
+        For Each cell In tbl.Range.Cells
+            cellContent = cell.Range.Text
+            ' Check if the second-to-last character is a paragraph mark (vbCr)
+            If Len(cellContent) > 2 And Mid(cellContent, Len(cellContent) - 1, 1) = vbCr Then
+                ' Remove only the second-to-last character (paragraph mark)
+                cell.Range.Text = Left(cellContent, Len(cellContent) - 2) & Right(cellContent, 1)
+            End If
+        Next cell
+    Next tbl
+End Sub
+

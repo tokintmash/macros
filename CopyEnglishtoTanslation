@@ -1,0 +1,34 @@
+Sub CopyEnglishToTranslation()
+    Dim tbl As Table
+    Dim rowIndex As Long
+    Dim englishCol As Long
+    Dim translationCol As Long
+    Dim cellText As String
+    Dim isColumnFound As Boolean
+    
+    ' Loop through all tables in the document
+    For Each tbl In ActiveDocument.Tables
+        isColumnFound = False
+        englishCol = 0
+        translationCol = 0
+        
+        ' Find the columns with "ENGLISH" and "TRANSLATION" in the first row
+        For colIndex = 1 To tbl.Columns.Count
+            cellText = Trim(tbl.Cell(1, colIndex).Range.Text)
+            cellText = Left(cellText, Len(cellText) - 2) ' Remove the end-of-cell marker
+            
+            If UCase(cellText) = "ENGLISH" Then
+                englishCol = colIndex
+            ElseIf UCase(cellText) = "TRANSLATION" Then
+                translationCol = colIndex
+            End If
+        Next colIndex
+        
+        ' If both columns were found, copy the "ENGLISH" column to the "TRANSLATION" column
+        If englishCol > 0 And translationCol > 0 Then
+            For rowIndex = 2 To tbl.Rows.Count ' Start from the second row
+                tbl.Cell(rowIndex, translationCol).Range.Text = tbl.Cell(rowIndex, englishCol).Range.Text
+            Next rowIndex
+        End If
+    Next tbl
+End Sub

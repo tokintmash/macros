@@ -1,0 +1,58 @@
+Sub CopyTablesToExcel()
+    Dim xlApp As Object
+    Dim xlBook As Object
+    Dim xlSheet As Object
+    Dim tbl As Table
+    Dim rng As Range
+    Dim rowCount As Long
+    Dim i As Long
+    Dim j As Long
+    
+    ' Create a new instance of Excel
+    On Error Resume Next
+    Set xlApp = CreateObject("Excel.Application")
+    On Error GoTo 0
+    
+    If xlApp Is Nothing Then
+        MsgBox "Excel is not installed on your system.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Add a new workbook and worksheet
+    Set xlBook = xlApp.Workbooks.Add
+    Set xlSheet = xlBook.Worksheets(1)
+    
+    ' Initialize the row counter
+    rowCount = 1
+    
+    ' Loop through each table in the Word document
+    For Each tbl In ActiveDocument.Tables
+        ' Loop through each row in the table
+        For i = 1 To tbl.Rows.Count
+            ' Loop through each cell in the row
+            For j = 1 To tbl.Columns.Count
+                ' Copy the content of the cell to Excel
+                xlSheet.Cells(rowCount, j).Value = tbl.Cell(i, j).Range.Text
+                ' Remove the end-of-cell marker (Chr(7))
+                xlSheet.Cells(rowCount, j).Value = Replace(xlSheet.Cells(rowCount, j).Value, Chr(7), "")
+            Next j
+            rowCount = rowCount + 1
+        Next i
+        
+        ' Leave 3 empty rows between tables
+        rowCount = rowCount + 3
+    Next tbl
+    
+    ' Auto-fit the columns in Excel
+    xlSheet.Columns("A:Z").AutoFit
+    
+    ' Make Excel visible
+    xlApp.Visible = True
+    
+    ' Clean up
+    Set xlSheet = Nothing
+    Set xlBook = Nothing
+    Set xlApp = Nothing
+    
+    MsgBox "Tables have been copied to Excel.", vbInformation
+End Sub

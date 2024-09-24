@@ -1,0 +1,41 @@
+Sub SaveAllImages()
+    Dim slideIndex As Integer
+    Dim shapeIndex As Integer
+    Dim pictureIndex As Integer
+    Dim currentSlide As slide
+    Dim currentShape As shape
+    Dim pictureName As String
+    Dim exportPath As String
+    
+    ' Define the folder to save images (change this path as needed)
+    exportPath = "C:\YourFolderPath\"
+
+    ' Ensure that the path ends with a backslash
+    If Right(exportPath, 1) <> "\" Then
+        exportPath = exportPath & "\"
+    End If
+
+    pictureIndex = 1
+    
+    ' Loop through all slides in the presentation
+    For slideIndex = 1 To ActivePresentation.Slides.Count
+        Set currentSlide = ActivePresentation.Slides(slideIndex)
+        
+        ' Loop through all shapes on the slide
+        For shapeIndex = 1 To currentSlide.Shapes.Count
+            Set currentShape = currentSlide.Shapes(shapeIndex)
+            
+            ' Check if the shape is a picture
+            If currentShape.Type = msoPicture Then
+                ' Create a unique filename for each picture
+                pictureName = "Slide" & slideIndex & "_Image" & pictureIndex & ".jpg"
+                
+                ' Export the picture as a JPEG file
+                currentShape.Export exportPath & pictureName, ppShapeFormatJPG
+                pictureIndex = pictureIndex + 1
+            End If
+        Next shapeIndex
+    Next slideIndex
+
+    MsgBox "All images have been saved to: " & exportPath
+End Sub

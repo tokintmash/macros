@@ -1,0 +1,41 @@
+Sub HideTagsOnly()
+    Dim rngStory As Range
+    Dim lngJunk As Long
+    Dim oShp As shape
+
+    ' Fix the skipped blank Header/Footer problem
+    lngJunk = ActiveDocument.Sections(1).Headers(1).Range.StoryType
+
+    ' Loop through all story types in the document
+    For Each rngStory In ActiveDocument.StoryRanges
+        ' Iterate through all linked stories
+        Do
+            HideTagsInRange rngStory
+            ' Get next linked story (if any)
+            Set rngStory = rngStory.NextStoryRange
+        Loop Until rngStory Is Nothing
+    Next rngStory
+
+    ' Loop through all shapes (text boxes, etc.)
+    For Each oShp In ActiveDocument.Shapes
+        If oShp.TextFrame.HasText Then
+            HideTagsInRange oShp.TextFrame.TextRange
+        End If
+    Next oShp
+End Sub
+
+Sub HideTagsInRange(rng As Range)
+    With rng.Find
+        .ClearFormatting
+        .Replacement.ClearFormatting
+        .Text = "\<[!\>]*\>"
+        .Replacement.Text = "^&"
+        .Replacement.Font.Hidden = True
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = True
+        .MatchWildcards = True
+        .Execute Replace:=wdReplaceAll
+    End With
+End Sub
+

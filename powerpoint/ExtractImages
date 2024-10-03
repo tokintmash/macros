@@ -8,7 +8,7 @@ Sub SaveAllImages()
     Dim exportPath As String
     
     ' Define the folder to save images (change this path as needed)
-    exportPath = "C:\YourFolderPath\"
+    exportPath = "C:\export\"
 
     ' Ensure that the path ends with a backslash
     If Right(exportPath, 1) <> "\" Then

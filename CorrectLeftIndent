@@ -5,14 +5,14 @@ Sub AdjustLeftIndentation()
     Dim targetFirstLineIndent As Single
     Dim newFirstLineIndent As Single
     
-    ' Set the target and new indent values in points
-    targetIndent = CentimetersToPoints(4.62)
-    newIndent = CentimetersToPoints(4.75)
+    ' Prompt the user for target and new indent values in centimeters
+    targetIndent = CentimetersToPoints(CSng(InputBox("Search for left indent:", "Target Left Indent")))
+    newIndent = CentimetersToPoints(CSng(InputBox("New left indent:", "New Left Indent")))
     
-    ' Set the target and new first line indent values in points
-    targetFirstLineIndent = CentimetersToPoints(0.5) ' Example value
-    newFirstLineIndent = CentimetersToPoints(1) ' Example value
-
+    ' Prompt the user for target and new first line indent values in centimeters
+    targetFirstLineIndent = CentimetersToPoints(CSng(InputBox("Search for first line indent:", "Target First Line Indent")))
+    newFirstLineIndent = CentimetersToPoints(CSng(InputBox("New first line indent:", "New First Line Indent")))
+    
     ' Loop through each paragraph in the document
     For Each para In ActiveDocument.Paragraphs
         ' Adjust Left Indent
@@ -32,3 +32,101 @@ End Sub
 Function CentimetersToPoints(cm As Single) As Single
     CentimetersToPoints = cm * 28.3465
 End Function
+
+' ----------------------
+
+' Sub AdjustLeftIndentation()
+'     Dim para As Paragraph
+'     Dim targetIndent As Single
+'     Dim newIndent As Single
+'     Dim targetFirstLineIndent As Single
+'     Dim newFirstLineIndent As Single
+    
+'     ' Set the target and new indent values in points
+'     targetIndent = CentimetersToPoints(4.62)
+'     newIndent = CentimetersToPoints(4.75)
+    
+'     ' Set the target and new first line indent values in points
+'     targetFirstLineIndent = CentimetersToPoints(0.5) ' Example value
+'     newFirstLineIndent = CentimetersToPoints(1) ' Example value
+
+'     ' Loop through each paragraph in the document
+'     For Each para In ActiveDocument.Paragraphs
+'         ' Adjust Left Indent
+'         If Abs(para.LeftIndent - targetIndent) < 1 Then
+'             para.LeftIndent = newIndent
+'         End If
+        
+'         ' Adjust First Line Indent
+'         If Abs(para.FirstLineIndent - targetFirstLineIndent) < 1 Then
+'             para.FirstLineIndent = newFirstLineIndent
+'         End If
+'     Next para
+    
+'     MsgBox "Indentation adjustments complete."
+' End Sub
+
+' Function CentimetersToPoints(cm As Single) As Single
+'     CentimetersToPoints = cm * 28.3465
+' End Function
+
+' -----------------------
+
+' Sub AdjustLeftIndentation()
+'     Dim para As Paragraph
+'     Dim targetIndent As Single
+'     Dim newIndent As Single
+'     Dim targetFirstLineIndent As Single
+'     Dim newFirstLineIndent As Single
+'     Dim input As String
+    
+'     ' Prompt the user for target and new indent values in centimeters
+'     input = InputBox("Enter the target left indent in centimeters:", "Target Left Indent")
+'     If input = "" Then
+'         targetIndent = 0
+'     Else
+'         targetIndent = CentimetersToPoints(CSng(input))
+'     End If
+    
+'     input = InputBox("Enter the new left indent in centimeters:", "New Left Indent")
+'     If input = "" Then
+'         newIndent = 0
+'     Else
+'         newIndent = CentimetersToPoints(CSng(input))
+'     End If
+    
+'     ' Prompt the user for target and new first line indent values in centimeters
+'     input = InputBox("Enter the target first line indent in centimeters:", "Target First Line Indent")
+'     If input = "" Then
+'         targetFirstLineIndent = 0
+'     Else
+'         targetFirstLineIndent = CentimetersToPoints(CSng(input))
+'     End If
+    
+'     input = InputBox("Enter the new first line indent in centimeters:", "New First Line Indent")
+'     If input = "" Then
+'         newFirstLineIndent = 0
+'     Else
+'         newFirstLineIndent = CentimetersToPoints(CSng(input))
+'     End If
+    
+'     ' Loop through each paragraph in the document
+'     For Each para In ActiveDocument.Paragraphs
+'         ' Adjust Left Indent
+'         If Abs(para.LeftIndent - targetIndent) < 1 Then
+'             para.LeftIndent = newIndent
+'         End If
+        
+'         ' Adjust First Line Indent
+'         If Abs(para.FirstLineIndent - targetFirstLineIndent) < 1 Then
+'             para.FirstLineIndent = newFirstLineIndent
+'         End If
+'     Next para
+    
+'     MsgBox "Indentation adjustments complete."
+' End Sub
+
+' Function CentimetersToPoints(cm As Single) As Single
+'     CentimetersToPoints = cm * 28.3465
+' End Function
+

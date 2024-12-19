@@ -1,0 +1,55 @@
+Sub ImportTxtFilesAsTabDelimited()
+    Dim folderPath As String
+    Dim fileName As String
+    Dim ws As Worksheet
+    Dim wb As Workbook
+    Dim txtImport As QueryTable
+    Dim lastRow As Long
+    
+    ' Prompt user to select folder
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "Select Folder Containing TXT Files"
+        If .Show <> -1 Then Exit Sub
+        folderPath = .SelectedItems(1) & "\"
+    End With
+    
+    ' Turn off screen updating for performance
+    Application.ScreenUpdating = False
+
+    ' Loop through all .txt files in the folder
+    fileName = Dir(folderPath & "*.txt")
+    Do While fileName <> ""
+        ' Add a new worksheet for each file
+        Set ws = ThisWorkbook.Sheets.Add
+        ws.Name = Left(fileName, InStrRev(fileName, ".") - 1)
+
+        ' Import the text file as Tab-delimited
+        Set txtImport = ws.QueryTables.Add(Connection:= _
+            "TEXT;" & folderPath & fileName, Destination:=ws.Range("A1"))
+
+        With txtImport
+            .TextFilePlatform = xlWindows
+            .TextFileStartRow = 1
+            .TextFileParseType = xlDelimited
+            .TextFileTabDelimiter = True
+            .TextFileConsecutiveDelimiter = False
+            .TextFileTrailingMinusNumbers = True
+            .Refresh BackgroundQuery:=False
+        End With
+
+        ' Clean up QueryTable after importing
+        txtImport.Delete
+
+        ' Add "=ISEVEN(ROW())" to the second column of each row
+        lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+        ws.Range("B1:B" & lastRow).Formula = "=ISEVEN(ROW())"
+
+        ' Get the next file
+        fileName = Dir
+    Loop
+
+    ' Turn screen updating back on
+    Application.ScreenUpdating = True
+
+    MsgBox "Import complete!", vbInformation
+End Sub

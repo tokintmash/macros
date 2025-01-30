@@ -1,0 +1,45 @@
+' Replace values in the active sheet based on values from Sheet1
+' Column A in Sheet1 contains the values to find
+' Column B contains the values to replace them with
+
+Sub ReplaceValuesBasedOnSheet1()
+    Dim wsActive As Worksheet
+    Dim wsSheet1 As Worksheet
+    Dim lastRowSheet1 As Long
+    Dim findValue As String
+    Dim replaceValue As String
+    Dim cell As Range
+    Dim dict As Object
+    Dim i As Long
+
+    ' Set the active sheet and Sheet1
+    Set wsActive = ActiveSheet
+    Set wsSheet1 = ThisWorkbook.Worksheets("Sheet1")
+    
+    ' Determine the last row in Sheet1
+    lastRowSheet1 = wsSheet1.Cells(wsSheet1.Rows.Count, "A").End(xlUp).Row
+
+    ' Create a dictionary for mapping find and replace values
+    Set dict = CreateObject("Scripting.Dictionary")
+    
+    ' Populate the dictionary with values from Sheet1
+    For i = 1 To lastRowSheet1
+        findValue = wsSheet1.Cells(i, 1).Value
+        replaceValue = wsSheet1.Cells(i, 2).Value
+        If Not dict.exists(findValue) Then
+            dict.Add findValue, replaceValue
+        End If
+    Next i
+
+    ' Loop through all cells in the active sheet
+    For Each cell In wsActive.UsedRange
+        If Not IsEmpty(cell.Value) And dict.exists(cell.Value) Then
+            cell.Value = dict(cell.Value)
+        End If
+    Next cell
+
+    ' Cleanup
+    Set dict = Nothing
+    
+    MsgBox "Replacement completed successfully!", vbInformation
+End Sub

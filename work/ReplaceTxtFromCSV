@@ -1,0 +1,44 @@
+Sub ReplaceTextFromCSV()
+    Dim doc As Document
+    Dim csvPath As String
+    Dim csvFile As Excel.Workbook    'Explicitly declare Excel.Workbook
+    Dim ws As Excel.Worksheet        'Explicitly declare Excel.Worksheet
+    Dim i As Long
+    Dim findText As String
+    Dim replaceText As String
+    Dim fd As FileDialog
+
+    ' Prompt the user to select the CSV file
+    Set fd = Application.FileDialog(msoFileDialogFilePicker)
+    With fd
+        .Title = "Select the CSV File"
+        .Filters.Clear
+        .Filters.Add "CSV Files", "*.csv"
+        .Filters.Add "All Files", "*.*"
+        If .Show = -1 Then
+            csvPath = .SelectedItems(1)
+        Else
+            MsgBox "No file selected. The process will be terminated.", vbExclamation
+            Exit Sub
+        End If
+    End With
+
+    ' Open the CSV file in Excel
+    Set csvFile = Workbooks.Open(csvPath)
+    Set ws = csvFile.Sheets(1)
+
+    ' Reference the current document
+    Set doc = ActiveDocument
+
+    ' Loop through translation pairs in the CSV file
+    For i = 1 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+        findText = ws.Cells(i, 1).Value
+        replaceText = ws.Cells(i, 2).Value
+        doc.Content.Find.Execute FindText:=findText, ReplaceWith:=replaceText, Replace:=wdReplaceAll
+    Next i
+
+    ' Close the CSV file
+    csvFile.Close False
+
+    MsgBox "Text replacement completed successfully!", vbInformation
+End Sub

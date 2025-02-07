@@ -1,0 +1,58 @@
+Sub ExtractCommentsFromFolder()
+    Dim objFSO As Object
+    Dim objFolder As Object
+    Dim objFile As Object
+    Dim doc As Document
+    Dim comment As Comment
+    Dim outputDoc As Document
+    Dim folderPath As String
+    Dim outputText As String
+    
+    ' Prompt user to select a folder
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        .Title = "Select Folder Containing Word Documents"
+        If .Show <> -1 Then Exit Sub
+        folderPath = .SelectedItems(1)
+    End With
+    
+    ' Create a new document for output
+    Set outputDoc = Documents.Add
+    outputDoc.Range.Text = "Extracted Comments:" & vbCrLf & String(50, "-") & vbCrLf
+    
+    ' Create File System Object
+    Set objFSO = CreateObject("Scripting.FileSystemObject")
+    Set objFolder = objFSO.GetFolder(folderPath)
+    
+    ' Loop through all Word files in the folder
+    For Each objFile In objFolder.Files
+        If LCase(objFSO.GetExtensionName(objFile.Name)) = "docx" Or LCase(objFSO.GetExtensionName(objFile.Name)) = "doc" Then
+            ' Open the Word document
+            Set doc = Documents.Open(FileName:=objFile.Path, ReadOnly:=True, Visible:=False)
+            
+            ' Extract comments
+            If doc.Comments.Count > 0 Then
+                outputText = "File: " & objFile.Name & vbCrLf
+                outputText = outputText & "Comments:" & vbCrLf
+                
+                For Each comment In doc.Comments
+                    outputText = outputText & " - [" & comment.Author & "] " & comment.Range.Text & vbCrLf
+                Next comment
+                
+                outputText = outputText & String(50, "-") & vbCrLf
+                outputDoc.Range.InsertAfter outputText
+            End If
+            
+            ' Close document
+            doc.Close SaveChanges:=False
+        End If
+    Next objFile
+    
+    ' Cleanup
+    MsgBox "Comment extraction complete. Results saved in the new document.", vbInformation
+    outputDoc.Activate
+
+    Set objFSO = Nothing
+    Set objFolder = Nothing
+    Set doc = Nothing
+    Set outputDoc = Nothing
+End Sub

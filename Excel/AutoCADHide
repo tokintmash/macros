@@ -1,0 +1,40 @@
+' Look into a folder and hide columns A-F in all files
+
+Sub AutoCADHide()
+    Dim folderPath As String
+    Dim fileName As String
+    Dim wb As Workbook
+    Dim ws As Worksheet
+    
+    ' Set the folder path here
+    folderPath = "C:\test\" ' <-- Change this to your folder
+    
+    ' Ensure the path ends with "\"
+    If Right(folderPath, 1) <> "\" Then folderPath = folderPath & "\"
+    
+    ' Get the first Excel file in the folder
+    fileName = Dir(folderPath & "*.xls*")
+    
+    ' Loop through all Excel files in the folder
+    Do While fileName <> ""
+        Set wb = Workbooks.Open(folderPath & fileName)
+        
+        ' Assuming you want to process the first sheet
+        Set ws = wb.Sheets(1)
+        
+        ' Copy column F to G, excluding the header
+        ws.Range("F2:F" & ws.Cells(ws.Rows.Count, "F").End(xlUp).Row).Copy _
+            Destination:=ws.Range("G2")
+        
+        ' Hide columns A to F
+        ws.Range("A:F").EntireColumn.Hidden = True
+        
+        ' Save and close
+        wb.Close SaveChanges:=True
+        
+        ' Get next file
+        fileName = Dir
+    Loop
+    
+    MsgBox "All files processed!"
+End Sub

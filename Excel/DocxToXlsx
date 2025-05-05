@@ -1,0 +1,138 @@
+Sub ImportDocxParagraphsToExcel()
+    Dim wordApp As Object
+    Dim wordDoc As Object
+    Dim fileDialog As FileDialog
+    Dim folderPath As String
+    Dim fileName As String
+    Dim excelWB As Workbook
+    Dim excelWS As Worksheet
+    Dim para As Object
+    Dim rowNum As Long
+    Dim savePath As String
+    Dim newWidth As Double
+
+    ' Prompt to select folder
+    Set fileDialog = Application.FileDialog(msoFileDialogFolderPicker)
+    If fileDialog.Show <> -1 Then Exit Sub
+    folderPath = fileDialog.SelectedItems(1) & "\"
+
+    ' Create Word Application
+    Set wordApp = CreateObject("Word.Application")
+    wordApp.Visible = False
+
+    ' Define new column width (3x default Excel column width)
+    newWidth = 50
+
+    ' Loop through each docx file
+    fileName = Dir(folderPath & "*.docx")
+    Do While fileName <> ""
+        ' Open Word document
+        Set wordDoc = wordApp.Documents.Open(folderPath & fileName)
+
+        ' Create new Excel Workbook
+        Set excelWB = Workbooks.Add
+        Set excelWS = excelWB.Sheets(1)
+        rowNum = 1
+
+        ' Loop through paragraphs and paste into Excel
+        For Each para In wordDoc.Paragraphs
+            If Trim(para.Range.Text) <> "" Then ' Skip empty paragraphs
+                excelWS.Cells(rowNum, 1).Value = para.Range.Text
+                excelWS.Cells(rowNum, 2).Value = para.Range.Text
+                rowNum = rowNum + 1
+            End If
+        Next para
+
+        wordDoc.Close False
+
+        ' Adjust both columns A and B
+        With excelWS.Columns("A:B")
+            .ColumnWidth = newWidth
+            .WrapText = True
+        End With
+
+        ' Hide column A
+        excelWS.Columns("A").Hidden = True
+
+        ' Save Excel file with same name as docx
+        savePath = folderPath & Replace(fileName, ".docx", ".xlsx")
+        excelWB.SaveAs savePath
+        excelWB.Close False
+
+        ' Next file
+        fileName = Dir
+    Loop
+
+    ' Cleanup
+    wordApp.Quit
+    Set wordApp = Nothing
+
+    MsgBox "All files processed!"
+End Sub
+
+
+
+' Sub ImportDocxParagraphsToExcel()
+'     Dim wordApp As Object
+'     Dim wordDoc As Object
+'     Dim fileDialog As FileDialog
+'     Dim folderPath As String
+'     Dim fileName As String
+'     Dim excelWB As Workbook
+'     Dim excelWS As Worksheet
+'     Dim para As Object
+'     Dim rowNum As Long
+'     Dim savePath As String
+
+'     ' Prompt to select folder
+'     Set fileDialog = Application.FileDialog(msoFileDialogFolderPicker)
+'     If fileDialog.Show <> -1 Then Exit Sub
+'     folderPath = fileDialog.SelectedItems(1) & "\"
+
+'     ' Create Word Application
+'     Set wordApp = CreateObject("Word.Application")
+'     wordApp.Visible = False
+
+'     ' Loop through each docx file
+'     fileName = Dir(folderPath & "*.docx")
+'     Do While fileName <> ""
+'         ' Open Word document
+'         Set wordDoc = wordApp.Documents.Open(folderPath & fileName)
+
+'         ' Create new Excel Workbook
+'         Set excelWB = Workbooks.Add
+'         Set excelWS = excelWB.Sheets(1)
+'         rowNum = 1
+
+'         ' Loop through paragraphs and paste into Excel
+'         For Each para In wordDoc.Paragraphs
+'             If Trim(para.Range.Text) <> "" Then ' Skip empty paragraphs
+'                 excelWS.Cells(rowNum, 1).Value = para.Range.Text
+'                 excelWS.Cells(rowNum, 2).Value = para.Range.Text
+'                 rowNum = rowNum + 1
+'             End If
+'         Next para
+
+'         wordDoc.Close False
+
+'         ' Hide column A
+'         excelWS.Columns("A").Hidden = True
+
+'         ' AutoFit column B for better readability
+'         excelWS.Columns("B").EntireColumn.AutoFit
+
+'         ' Save Excel file with same name as docx
+'         savePath = folderPath & Replace(fileName, ".docx", ".xlsx")
+'         excelWB.SaveAs savePath
+'         excelWB.Close False
+
+'         ' Next file
+'         fileName = Dir
+'     Loop
+
+'     ' Cleanup
+'     wordApp.Quit
+'     Set wordApp = Nothing
+
+'     MsgBox "All files processed!"
+' End Sub

@@ -1,0 +1,61 @@
+Sub CountWords_TranslatedUnder100Percent_Accurate()
+    Dim tbl As Table
+    Dim rw As Row
+    Dim col2Text As String
+    Dim match As Object
+    Dim regex As Object
+    Dim percentValue As Integer
+    Dim totalWordCount As Long
+    Dim matchedText As String
+    Dim cellText As String
+    Dim wordRegex As Object
+    Dim wordMatches As Object
+
+    ' Regex for Translated (XX%)
+    Set regex = CreateObject("VBScript.RegExp")
+    regex.Pattern = "Translated\s*\((\d{1,2})%\)"
+    regex.IgnoreCase = True
+    regex.Global = False
+
+    ' Regex for real words: sequences of letters/numbers
+    Set wordRegex = CreateObject("VBScript.RegExp")
+    wordRegex.Pattern = "\b[\w\-]+\b"
+    wordRegex.Global = True
+    wordRegex.IgnoreCase = True
+
+    totalWordCount = 0
+    matchedText = ""
+
+    ' Create a new document
+    Set newDoc = Documents.Add
+
+    For Each tbl In ActiveDocument.Tables
+        For Each rw In tbl.Rows
+            On Error Resume Next
+            col2Text = rw.Cells(2).Range.Text
+            col2Text = Left(col2Text, Len(col2Text) - 2) ' Remove cell end marker
+
+            If regex.Test(col2Text) Then
+                Set match = regex.Execute(col2Text)(0)
+                percentValue = CInt(match.SubMatches(0))
+
+                If percentValue < 100 Then
+                    cellText = rw.Cells(4).Range.Text
+                    cellText = Left(cellText, Len(cellText) - 2) ' Clean cell marker
+
+                    ' Count words with regex
+                    Set wordMatches = wordRegex.Execute(cellText)
+                    totalWordCount = totalWordCount + wordMatches.Count
+
+                    matchedText = matchedText & "- " & cellText & " (" & wordMatches.Count & " words)" & vbCrLf
+
+                    ' Write matched text to new document
+                    newDoc.Content.InsertAfter cellText & vbCrLf & vbCrLf
+                End If
+            End If
+        Next rw
+    Next tbl
+
+    MsgBox "Matched entries from column 4:" & vbCrLf & vbCrLf & matchedText, vbOKOnly, "Cell Texts"
+    MsgBox "Total word count in matching cells: " & totalWordCount, vbOKOnly, "Accurate Word Count"
+End Sub

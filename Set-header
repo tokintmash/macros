@@ -1,0 +1,63 @@
+Sub SetHeaders()
+    Dim folderPath As String
+    Dim fileName As String
+    Dim doc As Document
+    Dim rng As Range
+
+    ' CHANGE THIS PATH TO YOUR TARGET FOLDER
+    ' folderPath = "C:\Path\To\Your\Folder\"
+    folderPath = "F:\Work\OikeusM\37306\automate"
+    If Right(folderPath, 1) <> "\" Then folderPath = folderPath & "\"
+
+    fileName = Dir(folderPath & "*.docx")
+    
+    While fileName <> ""
+        Set doc = Documents.Open(folderPath & fileName)
+        
+        ' Set margins to Moderate (2.54 cm sides, 1.91 cm top/bottom)
+        With doc.PageSetup
+            .TopMargin = CentimetersToPoints(1.91)
+            .BottomMargin = CentimetersToPoints(1.91)
+            .LeftMargin = CentimetersToPoints(2.54)
+            .RightMargin = CentimetersToPoints(2.54)
+            .HeaderDistance = CentimetersToPoints(0.7)
+        End With
+        
+        ' Set entire document font to Arial
+        Set rng = doc.Content
+        With rng.Font
+            .Name = "Arial"
+        End With
+        
+        ' Set Header: Arial 10 pt, right aligned, "PAGE (NUMPAGES)"
+        Dim hdrRange As Range
+        Dim sec As Section
+        
+        For Each sec In doc.Sections
+            With sec.Headers(wdHeaderFooterPrimary)
+                .Range.Delete ' Clear existing header
+                Set hdrRange = .Range
+                With hdrRange
+                    .Font.Name = "Arial"
+                    .Font.Size = 10
+                    .ParagraphFormat.Alignment = wdAlignParagraphRight
+                    .Text = ""
+                    .Fields.Add Range:=hdrRange, Type:=wdFieldPage
+                    .InsertAfter " ("
+                    hdrRange.Collapse wdCollapseEnd
+                    .Fields.Add Range:=hdrRange, Type:=wdFieldNumPages
+                    hdrRange.Collapse wdCollapseEnd
+                    hdrRange.InsertAfter ")"
+                End With
+            End With
+        Next sec
+        
+        ' Save and close the document
+        doc.Save
+        doc.Close
+        
+        fileName = Dir
+    Wend
+
+    MsgBox "Formatting completed!"
+End Sub

@@ -1,0 +1,66 @@
+' Replaces values from a specified sheet
+' Source language must be on column A, target on column B
+
+Sub ReplaceTextFromSheet()
+    Dim translationSheet As Worksheet
+    Dim targetSheet As Worksheet
+    Dim ws As Worksheet
+    Dim pairSheetName As String
+    Dim lastRow As Long
+    Dim findText As String
+    Dim replaceText As String
+    Dim cell As Range
+    Dim i As Long
+    
+    Set targetSheet = ActiveSheet
+    
+    ' Prompt user to input the name of the sheet with translations
+    pairSheetName = InputBox("Enter the name of the sheet that contains the translation pairs (column A = original, column B = translation):", "Translation Sheet Name")
+    
+    If pairSheetName = "" Then
+        MsgBox "No sheet name entered. Process canceled.", vbExclamation
+        Exit Sub
+    End If
+    
+    On Error Resume Next
+    Set translationSheet = ThisWorkbook.Sheets(pairSheetName)
+    On Error GoTo 0
+    
+    If translationSheet Is Nothing Then
+        MsgBox "Sheet '" & pairSheetName & "' was not found.", vbCritical
+        Exit Sub
+    End If
+    
+    If translationSheet.Name = targetSheet.Name Then
+        MsgBox "The translation sheet cannot be the same as the active sheet.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Find the last row with data in column A
+    lastRow = translationSheet.Cells(translationSheet.Rows.Count, 1).End(xlUp).Row
+    
+    Application.ScreenUpdating = False
+    
+    ' Loop through each find/replace pair
+    For i = 1 To lastRow
+        findText = translationSheet.Cells(i, 1).Value
+        replaceText = translationSheet.Cells(i, 2).Value
+        
+        If findText <> "" Then
+            ' Loop through each used cell in the active sheet
+            For Each cell In targetSheet.UsedRange
+                If VarType(cell.Value) = vbString Then
+                    ' Case-sensitive replacement
+                    If cell.Value Like "*" & findText & "*" Then
+                        If InStrB(1, cell.Value, findText, vbBinaryCompare) > 0 Then
+                            cell.Value = Replace(cell.Value, findText, replaceText, , , vbBinaryCompare)
+                        End If
+                    End If
+                End If
+            Next cell
+        End If
+    Next i
+    
+    Application.ScreenUpdating = True
+    MsgBox "Text replacement completed on sheet '" & targetSheet.Name & "'.", vbInformation
+End Sub

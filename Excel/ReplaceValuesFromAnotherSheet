@@ -23,7 +23,7 @@ Sub ReplaceTextFromSheet()
     End If
     
     On Error Resume Next
-    Set translationSheet = ThisWorkbook.Sheets(pairSheetName)
+    Set translationSheet = ActiveWorkbook.Sheets(pairSheetName)
     On Error GoTo 0
     
     If translationSheet Is Nothing Then
@@ -51,7 +51,7 @@ Sub ReplaceTextFromSheet()
             For Each cell In targetSheet.UsedRange
                 If VarType(cell.Value) = vbString Then
                     ' Case-sensitive replacement
-                    If cell.Value Like "*" & findText & "*" Then
+                    If cell.Value = findText Then
                         If InStrB(1, cell.Value, findText, vbBinaryCompare) > 0 Then
                             cell.Value = Replace(cell.Value, findText, replaceText, , , vbBinaryCompare)
                         End If
@@ -64,3 +64,4 @@ Sub ReplaceTextFromSheet()
     Application.ScreenUpdating = True
     MsgBox "Text replacement completed on sheet '" & targetSheet.Name & "'.", vbInformation
 End Sub
+

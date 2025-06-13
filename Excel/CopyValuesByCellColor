@@ -1,0 +1,54 @@
+' Asks for a cell to get the background color
+' and copies the contents to "tr" sheet column A
+
+Sub CopyCellsByColor()
+    Dim targetSheet As Worksheet
+    Dim sourceSheet As Worksheet
+    Dim colorSample As Range
+    Dim matchColor As Long
+    Dim cell As Range
+    Dim outputRow As Long
+
+    ' Prompt for the color sample
+    Set colorSample = Application.InputBox("Click a cell that has the background color you want to search for.", "Pick a Sample Cell", Type:=8)
+    If colorSample Is Nothing Then Exit Sub
+
+    matchColor = colorSample.Interior.Color
+    Set sourceSheet = ActiveSheet
+
+    On Error Resume Next
+    Set targetSheet = ActiveWorkbook.Sheets("tr")
+    On Error GoTo 0
+
+    If targetSheet Is Nothing Then
+        MsgBox "Sheet 'tr' was not found in the active workbook. Please create it first.", vbCritical
+        Exit Sub
+    End If
+
+    If sourceSheet.Name = targetSheet.Name Then
+        MsgBox "The source sheet and target sheet cannot be the same.", vbExclamation
+        Exit Sub
+    End If
+
+    Application.ScreenUpdating = False
+
+    ' Find the first empty row in column A
+    outputRow = targetSheet.Cells(targetSheet.Rows.Count, 1).End(xlUp).Row + 1
+    If targetSheet.Cells(1, 1).Value = "" Then outputRow = 1
+
+    ' Loop through used cells and copy matches
+    For Each cell In sourceSheet.UsedRange
+        If cell.Interior.Color = matchColor Then
+            If cell.Value <> "" Then
+                If targetSheet.Cells(outputRow, 1).Value = "" Then
+                    targetSheet.Cells(outputRow, 1).Value = cell.Value
+                    outputRow = outputRow + 1
+                End If
+            End If
+        End If
+    Next cell
+
+    Application.ScreenUpdating = True
+    MsgBox "Values with matching background color copied to sheet 'tr'.", vbInformation
+End Sub
+

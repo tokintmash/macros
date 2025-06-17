@@ -1,0 +1,93 @@
+' This macro replaces texts on the active sheet according to the translation pairs in another sheet
+' where on Column A must contain the original and Column B must contain the translation
+' On execution, the macro asks if you want to add or replace, after which it asks for the
+' sheet name with translation pairs.
+' When replacing, the texts are replaced with translations.
+' When adding, the translations are added to the original text's cell on a new line.
+
+Sub ReplaceOrAddTranslations()
+    Dim translationSheet As Worksheet
+    Dim targetSheet As Worksheet
+    Dim pairSheetName As String
+    Dim lastRow As Long
+    Dim findText As String
+    Dim replaceText As String
+    Dim cell As Range
+    Dim i As Long
+    Dim mode As String
+    Dim activeCol As Long
+    Dim targetRange As Range
+
+    Set targetSheet = ActiveSheet
+
+    ' Ask user for mode
+    mode = InputBox("Enter mode: 'Replace' to replace cell content, or 'Add' to append translation below original text.", "Choose Mode")
+
+    If mode = "" Then
+        MsgBox "No mode entered. Process canceled.", vbExclamation
+        Exit Sub
+    End If
+
+    mode = LCase(Trim(mode))
+    If mode <> "replace" And mode <> "add" Then
+        MsgBox "Invalid mode. Please enter 'Replace' or 'Add'.", vbCritical
+        Exit Sub
+    End If
+
+    ' Ask user for translation sheet
+    pairSheetName = InputBox("Enter the name of the sheet that contains the translation pairs (column A = original, column B = translation):", "Translation Sheet Name")
+
+    If pairSheetName = "" Then
+        MsgBox "No sheet name entered. Process canceled.", vbExclamation
+        Exit Sub
+    End If
+
+    On Error Resume Next
+    Set translationSheet = ActiveWorkbook.Sheets(pairSheetName)
+    On Error GoTo 0
+
+    If translationSheet Is Nothing Then
+        MsgBox "Sheet '" & pairSheetName & "' was not found.", vbCritical
+        Exit Sub
+    End If
+
+    If translationSheet.Name = targetSheet.Name Then
+        MsgBox "The translation sheet cannot be the same as the active sheet.", vbExclamation
+        Exit Sub
+    End If
+
+    lastRow = translationSheet.Cells(translationSheet.Rows.Count, 1).End(xlUp).Row
+
+    Application.ScreenUpdating = False
+
+    ' Determine the range to process
+    If mode = "add" Then
+        activeCol = ActiveCell.Column
+        Set targetRange = Intersect(targetSheet.UsedRange, targetSheet.Columns(activeCol))
+    Else
+        Set targetRange = targetSheet.UsedRange
+    End If
+
+    For i = 1 To lastRow
+        findText = translationSheet.Cells(i, 1).Value
+        replaceText = translationSheet.Cells(i, 2).Value
+
+        If findText <> "" Then
+            For Each cell In targetRange
+                If VarType(cell.Value) = vbString Then
+                    If cell.Value = findText Then
+                        If mode = "replace" Then
+                            cell.Value = replaceText
+                        ElseIf mode = "add" Then
+                            cell.Value = cell.Value & vbLf & replaceText
+                        End If
+                    End If
+                End If
+            Next cell
+        End If
+    Next i
+
+    Application.ScreenUpdating = True
+    MsgBox "Translation completed in '" & mode & "' mode on sheet '" & targetSheet.Name & "'.", vbInformation
+End Sub
+

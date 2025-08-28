@@ -1,0 +1,53 @@
+' Reads the active sheet of the current file
+' if the cell is not empty, copies a value from another file same location (for ex: H8)
+' and appends it to the contents of the cell after a newline
+
+Option Explicit
+
+Sub AppendFromOtherWorkbook()
+    Dim srcWS As Worksheet           ' active sheet in this workbook
+    Dim otherWB As Workbook          ' the other workbook
+    Dim otherWS As Worksheet         ' its active sheet
+    Dim filePath As Variant
+    Dim c As Range
+    Dim addVal As String
+    
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+    
+    Set srcWS = ActiveSheet
+    
+    ' Let the user pick the other Excel file
+    filePath = Application.GetOpenFilename( _
+        FileFilter:="Excel Files (*.xls*), *.xls*", _
+        Title:="Select the workbook to pull matching cells from")
+    If filePath = False Then GoTo CleanExit
+    
+    Set otherWB = Workbooks.Open(CStr(filePath), ReadOnly:=True)
+    Set otherWS = otherWB.ActiveSheet
+    
+    ' Loop all used cells on the current sheet
+    For Each c In srcWS.UsedRange.Cells
+        ' Only if the current cell is not empty
+        If Len(Trim$(c.Value)) > 0 Then
+            ' Read the same address from the other workbook's active sheet
+            addVal = otherWS.Range(c.Address).Value
+            
+            ' If the other cell has content, append it on a new line
+            If Len(Trim$(addVal)) > 0 Then
+                If Right$(CStr(c.Value), 1) = vbLf Then
+                    c.Value = CStr(c.Value) & CStr(addVal)
+                Else
+                    c.Value = CStr(c.Value) & vbLf & CStr(addVal)
+                End If
+                c.WrapText = True      ' show the newline inside the cell
+            End If
+        End If
+    Next c
+    
+CleanExit:
+    On Error Resume Next
+    If Not otherWB Is Nothing Then otherWB.Close SaveChanges:=False
+    Application.DisplayAlerts = True
+    Application.ScreenUpdating = True
+End Sub
